@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  x86-cpu-detector:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      platforms:
+        - linux/amd64
+    platform: linux/amd64
+    environment:
+      - DISPLAY=${DISPLAY:-:99}
+    volumes:
+      # For X11 forwarding on Linux
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    network_mode: host
+    stdin_open: true
+    tty: true

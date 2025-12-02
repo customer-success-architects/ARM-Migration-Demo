@@ -1,0 +1,11 @@
+external/
+build/
+.git/
+.gitignore
+.DS_Store
+*.o
+*.so
+*.a
+cmake-build-*/
+.vscode/
+.idea/
