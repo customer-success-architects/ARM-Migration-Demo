@@ -36,7 +36,7 @@ bool GUI::initialize() {
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
     
     SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
-    window_ = SDL_CreateWindow("x86 CPU Feature Detector", 
+    window_ = SDL_CreateWindow("CPU Feature Detector", 
                                 SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                                 1280, 720, window_flags);
     if (!window_) {
@@ -122,9 +122,13 @@ void GUI::render() {
     ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | 
                                      ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings;
     
-    ImGui::Begin("x86 CPU Feature Detector", nullptr, window_flags);
+    ImGui::Begin("CPU Feature Detector", nullptr, window_flags);
     
+#ifdef __aarch64__
+    ImGui::Text("ARM64 CPU Information");
+#else
     ImGui::Text("x86/x64 CPU Information");
+#endif
     ImGui::Separator();
     
     if (ImGui::BeginTabBar("CPUTabs")) {
@@ -157,9 +161,27 @@ void GUI::renderProcessorInfo() {
     ImGui::Text("Brand:         %s", info.brand.c_str());
     ImGui::Separator();
     
+#ifdef __aarch64__
+    if (!info.implementer.empty()) {
+        ImGui::Text("Implementer:   %s", info.implementer.c_str());
+    }
+    if (!info.architecture.empty()) {
+        ImGui::Text("Architecture:  %s", info.architecture.c_str());
+    }
+    if (!info.variant.empty()) {
+        ImGui::Text("Variant:       %s", info.variant.c_str());
+    }
+    if (!info.part.empty()) {
+        ImGui::Text("Part:          %s", info.part.c_str());
+    }
+    if (!info.revision.empty()) {
+        ImGui::Text("Revision:      %s", info.revision.c_str());
+    }
+#else
     ImGui::Text("Family:        %u", info.family);
     ImGui::Text("Model:         %u", info.model);
     ImGui::Text("Stepping:      %u", info.stepping);
+#endif
     ImGui::Separator();
     
     ImGui::Text("Physical Cores: %u", info.physical_cores);
@@ -179,7 +201,81 @@ void GUI::renderFeatures() {
     
     ImGui::Spacing();
     
-    // SIMD Instructions
+#ifdef __aarch64__
+    // ARM SIMD Instructions
+    if (ImGui::CollapsingHeader("ARM SIMD Instructions", ImGuiTreeNodeFlags_DefaultOpen)) {
+        ImGui::Indent();
+        
+        ImGui::BeginTable("ARM_SIMD", 3);
+        ImGui::TableNextColumn(); ImGui::Checkbox("FP", (bool*)&features.fp);
+        ImGui::TableNextColumn(); ImGui::Checkbox("ASIMD (NEON)", (bool*)&features.asimd);
+        ImGui::TableNextColumn(); ImGui::Checkbox("FP16", (bool*)&features.fp16);
+        
+        ImGui::TableNextColumn(); ImGui::Checkbox("BF16", (bool*)&features.bf16);
+        ImGui::TableNextColumn(); ImGui::Checkbox("Dot Product", (bool*)&features.dotprod);
+        ImGui::TableNextColumn(); ImGui::Checkbox("I8MM", (bool*)&features.i8mm);
+        
+        ImGui::TableNextColumn(); ImGui::Checkbox("RDM", (bool*)&features.rdm);
+        ImGui::TableNextColumn(); ImGui::Checkbox("FCMA", (bool*)&features.fcma);
+        ImGui::TableNextColumn(); ImGui::Checkbox("JSCVT", (bool*)&features.jscvt);
+        
+        ImGui::TableNextColumn(); ImGui::Checkbox("FRINT", (bool*)&features.frint);
+        ImGui::EndTable();
+        
+        ImGui::Text("Scalable Vector Extensions:");
+        ImGui::BeginTable("SVE", 2);
+        ImGui::TableNextColumn(); ImGui::Checkbox("SVE", (bool*)&features.sve);
+        ImGui::TableNextColumn(); ImGui::Checkbox("SVE2", (bool*)&features.sve2);
+        ImGui::TableNextColumn(); ImGui::Checkbox("SVE AES", (bool*)&features.sve_aes);
+        ImGui::TableNextColumn(); ImGui::Checkbox("SVE PMULL", (bool*)&features.sve_pmull);
+        ImGui::EndTable();
+        
+        ImGui::Unindent();
+    }
+    
+    // Cryptographic Features
+    if (ImGui::CollapsingHeader("Cryptographic Features", ImGuiTreeNodeFlags_DefaultOpen)) {
+        ImGui::Indent();
+        ImGui::BeginTable("Crypto", 3);
+        ImGui::TableNextColumn(); ImGui::Checkbox("AES", (bool*)&features.aes);
+        ImGui::TableNextColumn(); ImGui::Checkbox("PMULL", (bool*)&features.pmull);
+        ImGui::TableNextColumn(); ImGui::Checkbox("SHA1", (bool*)&features.sha1);
+        
+        ImGui::TableNextColumn(); ImGui::Checkbox("SHA2", (bool*)&features.sha2);
+        ImGui::TableNextColumn(); ImGui::Checkbox("SHA3", (bool*)&features.sha3);
+        ImGui::TableNextColumn(); ImGui::Checkbox("SHA512", (bool*)&features.sha512);
+        
+        ImGui::TableNextColumn(); ImGui::Checkbox("SM3", (bool*)&features.sm3);
+        ImGui::TableNextColumn(); ImGui::Checkbox("SM4", (bool*)&features.sm4);
+        ImGui::TableNextColumn(); ImGui::Checkbox("CRC32", (bool*)&features.crc32);
+        ImGui::EndTable();
+        ImGui::Unindent();
+    }
+    
+    // Atomic & Memory Features
+    if (ImGui::CollapsingHeader("Atomic & Memory Features", ImGuiTreeNodeFlags_DefaultOpen)) {
+        ImGui::Indent();
+        ImGui::BeginTable("Atomic", 3);
+        ImGui::TableNextColumn(); ImGui::Checkbox("LSE", (bool*)&features.lse);
+        ImGui::TableNextColumn(); ImGui::Checkbox("LSE2", (bool*)&features.lse2);
+        ImGui::TableNextColumn(); ImGui::Checkbox("DCPOP", (bool*)&features.dcpop);
+        ImGui::EndTable();
+        ImGui::Unindent();
+    }
+    
+    // Security Features
+    if (ImGui::CollapsingHeader("Security Features", ImGuiTreeNodeFlags_DefaultOpen)) {
+        ImGui::Indent();
+        ImGui::BeginTable("Security", 3);
+        ImGui::TableNextColumn(); ImGui::Checkbox("Pointer Auth", (bool*)&features.pauth);
+        ImGui::TableNextColumn(); ImGui::Checkbox("BTI", (bool*)&features.bti);
+        ImGui::TableNextColumn(); ImGui::Checkbox("MTE", (bool*)&features.mte);
+        ImGui::EndTable();
+        ImGui::Unindent();
+    }
+    
+#else
+    // x86 SIMD Instructions
     if (ImGui::CollapsingHeader("SIMD Instructions", ImGuiTreeNodeFlags_DefaultOpen)) {
         ImGui::Indent();
         
@@ -252,6 +348,7 @@ void GUI::renderFeatures() {
         ImGui::EndTable();
         ImGui::Unindent();
     }
+#endif
 }
 
 void GUI::renderCacheInfo() {

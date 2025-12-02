@@ -7,7 +7,48 @@
 class CPUInfo {
 public:
     struct Features {
-        // SIMD Instructions
+        // ARM SIMD Instructions
+        bool neon = false;           // ARM NEON (Advanced SIMD)
+        bool asimd = false;          // Advanced SIMD
+        bool sve = false;            // Scalable Vector Extension
+        bool sve2 = false;           // SVE2
+        bool fp = false;             // Floating Point
+        bool fp16 = false;           // Half-precision floating point
+        bool bf16 = false;           // Brain Float16
+        bool i8mm = false;           // Int8 Matrix Multiply
+        
+        // Cryptographic
+        bool aes = false;            // AES instructions
+        bool pmull = false;          // Polynomial Multiply Long
+        bool sha1 = false;           // SHA1 instructions
+        bool sha2 = false;           // SHA2 instructions
+        bool sha3 = false;           // SHA3 instructions
+        bool sha512 = false;         // SHA512 instructions
+        bool sm3 = false;            // SM3 instructions
+        bool sm4 = false;            // SM4 instructions
+        
+        // Atomic & Memory
+        bool atomics = false;        // Large System Extensions (LSE)
+        bool lse = false;            // Atomic instructions
+        bool lse2 = false;           // LSE2
+        bool dcpop = false;          // Data cache clean to PoP
+        
+        // Security & Virtualization
+        bool sve_aes = false;        // SVE AES
+        bool sve_pmull = false;      // SVE polynomial multiply
+        bool pauth = false;          // Pointer Authentication
+        bool bti = false;            // Branch Target Identification
+        bool mte = false;            // Memory Tagging Extension
+        
+        // Other Features
+        bool crc32 = false;          // CRC32 instructions
+        bool rdm = false;            // Rounding Double Multiply
+        bool dotprod = false;        // Dot Product
+        bool fcma = false;           // Complex number operations
+        bool jscvt = false;          // JavaScript conversion
+        bool frint = false;          // Floating-point rounding
+        
+        // x86 compatibility flags (for code that checks these)
         bool mmx = false;
         bool sse = false;
         bool sse2 = false;
@@ -23,23 +64,13 @@ public:
         bool avx512vl = false;
         bool fma = false;
         bool fma4 = false;
-        
-        // Cryptographic
-        bool aes = false;
-        bool sha = false;
         bool pclmulqdq = false;
-        
-        // Virtualization
-        bool vmx = false;  // Intel VT-x
-        bool svm = false;  // AMD-V
-        
-        // Security
+        bool vmx = false;
+        bool svm = false;
         bool nx = false;
         bool smep = false;
         bool smap = false;
         bool sgx = false;
-        
-        // Other
         bool rdrand = false;
         bool rdseed = false;
         bool popcnt = false;
@@ -60,6 +91,11 @@ public:
     struct ProcessorInfo {
         std::string vendor;
         std::string brand;
+        std::string implementer;     // ARM implementer
+        std::string architecture;    // ARM architecture version
+        std::string variant;         // CPU variant
+        std::string part;            // CPU part number
+        std::string revision;        // CPU revision
         uint32_t family = 0;
         uint32_t model = 0;
         uint32_t stepping = 0;
@@ -85,6 +121,13 @@ private:
     uint32_t max_basic_leaf_ = 0;
     uint32_t max_extended_leaf_ = 0;
     
+#ifdef __aarch64__
+    void detectARM();
+    void parseARMCPUInfo();
+    void detectARMFeatures();
+    void detectARMCacheInfo();
+    void detectARMTopology();
+#else
     void cpuid(uint32_t leaf, uint32_t subleaf, uint32_t& eax, uint32_t& ebx, uint32_t& ecx, uint32_t& edx);
     void detectVendor();
     void detectBrand();
@@ -92,4 +135,5 @@ private:
     void detectCacheInfo();
     void detectTopology();
     void detectFrequency();
+#endif
 };
