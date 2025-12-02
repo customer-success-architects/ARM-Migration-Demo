@@ -1,19 +1,23 @@
-# x86 CPU Feature Detector
+# CPU Feature Detector
 
-A desktop application that detects and displays x86/x64 CPU capabilities using the CPUID instruction.
+A desktop application that detects and displays CPU capabilities. Supports both x86/x64 (using CPUID instruction) and ARM64/AArch64 architectures.
 
 ## Features
 
-- **CPU Identification**: Vendor, brand, family, model, stepping
-- **Instruction Set Detection**: SSE, AVX, AVX2, AVX-512 support
-- **Cryptographic Features**: AES-NI, SHA extensions
+- **CPU Identification**: Vendor, brand, family, model, stepping (x86) / implementer, variant, part (ARM)
+- **Instruction Set Detection**: 
+  - x86: SSE, AVX, AVX2, AVX-512 support
+  - ARM: NEON/ASIMD, SVE, SVE2, FP16, BF16, Dot Product
+- **Cryptographic Features**: AES, SHA extensions
 - **Cache Information**: L1/L2/L3 cache sizes and topology
 - **Core Topology**: Physical cores and logical threads
 - **Frequency Information**: Base and maximum CPU frequencies
 
 ## Architecture Support
 
-**x86/x86-64 ONLY** - This application is intentionally built for x86 architecture only and will not compile or run on ARM processors.
+This application supports both architectures:
+- **x86/x86-64**: Uses CPUID instruction for feature detection
+- **ARM64/AArch64**: Uses Linux HWCAP and sysfs for feature detection
 
 ## Building
 
@@ -24,7 +28,7 @@ A desktop application that detects and displays x86/x64 CPU capabilities using t
 - SDL2
 - OpenGL
 
-### macOS
+### macOS (Intel or Apple Silicon)
 
 ```bash
 # Install dependencies
@@ -40,10 +44,10 @@ cd ..
 mkdir build && cd build
 cmake ..
 make
-./x86CPUDetector
+./ARMCPUDetector  # or ./x86CPUDetector on Intel
 ```
 
-### Linux
+### Linux (x86 or ARM)
 
 ```bash
 # Install dependencies (Ubuntu/Debian)
@@ -59,7 +63,7 @@ cd ..
 mkdir build && cd build
 cmake ..
 make
-./x86CPUDetector
+./ARMCPUDetector
 ```
 
 ### Windows
@@ -80,25 +84,23 @@ cmake .. -DCMAKE_TOOLCHAIN_FILE=[vcpkg root]/scripts/buildsystems/vcpkg.cmake
 cmake --build .
 ```
 
-## Running with Docker (Recommended for ARM Macs)
+## Running with Docker
 
-If you're on Apple Silicon (ARM) or want to run in an isolated environment:
+You can build and run the application in Docker for ARM64:
 
 ```bash
 # Make sure Docker Desktop is installed and running
 ./run-docker.sh
 ```
 
-This will build and run the x86 application in a Docker container using x86 emulation, even on ARM Macs.
-
 ### Alternative Docker Commands
 
 ```bash
-# Build the image
-docker build --platform linux/amd64 -t x86-cpu-detector .
+# Build the image for ARM64
+docker build --platform linux/arm64 -t arm-cpu-detector .
 
 # Run the container
-docker run --platform linux/amd64 --rm x86-cpu-detector
+docker run --platform linux/arm64 --rm arm-cpu-detector
 
 # Or use docker-compose
 docker-compose up --build

@@ -122,9 +122,15 @@ void GUI::render() {
     ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | 
                                      ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings;
     
+#ifdef ARM_BUILD
+    ImGui::Begin("ARM CPU Feature Detector", nullptr, window_flags);
+    
+    ImGui::Text("ARM64/AArch64 CPU Information");
+#else
     ImGui::Begin("x86 CPU Feature Detector", nullptr, window_flags);
     
     ImGui::Text("x86/x64 CPU Information");
+#endif
     ImGui::Separator();
     
     if (ImGui::BeginTabBar("CPUTabs")) {
@@ -157,9 +163,16 @@ void GUI::renderProcessorInfo() {
     ImGui::Text("Brand:         %s", info.brand.c_str());
     ImGui::Separator();
     
+#ifdef ARM_BUILD
+    ImGui::Text("Implementer:   0x%02X", info.implementer);
+    ImGui::Text("Variant:       0x%X", info.variant);
+    ImGui::Text("Part:          0x%03X", info.part);
+    ImGui::Text("Revision:      %u", info.revision);
+#else
     ImGui::Text("Family:        %u", info.family);
     ImGui::Text("Model:         %u", info.model);
     ImGui::Text("Stepping:      %u", info.stepping);
+#endif
     ImGui::Separator();
     
     ImGui::Text("Physical Cores: %u", info.physical_cores);
@@ -179,6 +192,95 @@ void GUI::renderFeatures() {
     
     ImGui::Spacing();
     
+#ifdef ARM_BUILD
+    // NEON (Advanced SIMD) Instructions
+    if (ImGui::CollapsingHeader("NEON/ASIMD Instructions", ImGuiTreeNodeFlags_DefaultOpen)) {
+        ImGui::Indent();
+        
+        ImGui::BeginTable("NEON", 3);
+        ImGui::TableNextColumn(); ImGui::Checkbox("NEON/ASIMD", (bool*)&features.neon);
+        ImGui::TableNextColumn(); ImGui::Checkbox("FP16", (bool*)&features.neon_fp16);
+        ImGui::TableNextColumn(); ImGui::Checkbox("BF16", (bool*)&features.neon_bf16);
+        
+        ImGui::TableNextColumn(); ImGui::Checkbox("Dot Product", (bool*)&features.neon_dotprod);
+        ImGui::TableNextColumn(); ImGui::Checkbox("I8MM", (bool*)&features.neon_i8mm);
+        ImGui::TableNextColumn(); ImGui::Checkbox("FP", (bool*)&features.fp);
+        ImGui::EndTable();
+        
+        ImGui::Unindent();
+    }
+    
+    // SVE (Scalable Vector Extension)
+    if (ImGui::CollapsingHeader("SVE (Scalable Vector Extension)", ImGuiTreeNodeFlags_DefaultOpen)) {
+        ImGui::Indent();
+        
+        ImGui::BeginTable("SVE", 3);
+        ImGui::TableNextColumn(); ImGui::Checkbox("SVE", (bool*)&features.sve);
+        ImGui::TableNextColumn(); ImGui::Checkbox("SVE2", (bool*)&features.sve2);
+        ImGui::TableNextColumn();
+        if (features.sve && features.sve_vector_length > 0) {
+            ImGui::Text("Vector Length: %u bits", features.sve_vector_length);
+        }
+        ImGui::EndTable();
+        
+        ImGui::Unindent();
+    }
+    
+    // Cryptographic Extensions
+    if (ImGui::CollapsingHeader("Cryptographic Extensions", ImGuiTreeNodeFlags_DefaultOpen)) {
+        ImGui::Indent();
+        
+        ImGui::BeginTable("Crypto", 3);
+        ImGui::TableNextColumn(); ImGui::Checkbox("AES", (bool*)&features.aes);
+        ImGui::TableNextColumn(); ImGui::Checkbox("SHA1", (bool*)&features.sha1);
+        ImGui::TableNextColumn(); ImGui::Checkbox("SHA2", (bool*)&features.sha2);
+        
+        ImGui::TableNextColumn(); ImGui::Checkbox("SHA3", (bool*)&features.sha3);
+        ImGui::TableNextColumn(); ImGui::Checkbox("SHA512", (bool*)&features.sha512);
+        ImGui::TableNextColumn(); ImGui::Checkbox("PMULL", (bool*)&features.pmull);
+        ImGui::EndTable();
+        
+        ImGui::Unindent();
+    }
+    
+    // Security Features
+    if (ImGui::CollapsingHeader("Security Features", ImGuiTreeNodeFlags_DefaultOpen)) {
+        ImGui::Indent();
+        
+        ImGui::BeginTable("Security", 3);
+        ImGui::TableNextColumn(); ImGui::Checkbox("PAC (Address)", (bool*)&features.paca);
+        ImGui::TableNextColumn(); ImGui::Checkbox("PAC (Generic)", (bool*)&features.pacg);
+        ImGui::TableNextColumn(); ImGui::Checkbox("BTI", (bool*)&features.bti);
+        
+        ImGui::TableNextColumn(); ImGui::Checkbox("MTE", (bool*)&features.mte);
+        ImGui::TableNextColumn(); ImGui::Checkbox("SSBS", (bool*)&features.ssbs);
+        ImGui::TableNextColumn(); ImGui::Checkbox("SB", (bool*)&features.sb);
+        ImGui::EndTable();
+        
+        ImGui::Unindent();
+    }
+    
+    // Other Features
+    if (ImGui::CollapsingHeader("Other Features", ImGuiTreeNodeFlags_DefaultOpen)) {
+        ImGui::Indent();
+        
+        ImGui::BeginTable("Other", 3);
+        ImGui::TableNextColumn(); ImGui::Checkbox("CRC32", (bool*)&features.crc32);
+        ImGui::TableNextColumn(); ImGui::Checkbox("Atomics (LSE)", (bool*)&features.atomics);
+        ImGui::TableNextColumn(); ImGui::Checkbox("DCPOP", (bool*)&features.dcpop);
+        
+        ImGui::TableNextColumn(); ImGui::Checkbox("JSCVT", (bool*)&features.jscvt);
+        ImGui::TableNextColumn(); ImGui::Checkbox("FCMA", (bool*)&features.fcma);
+        ImGui::TableNextColumn(); ImGui::Checkbox("LRCPC", (bool*)&features.lrcpc);
+        
+        ImGui::TableNextColumn(); ImGui::Checkbox("FLAGM", (bool*)&features.flagm);
+        ImGui::TableNextColumn(); ImGui::Checkbox("FPHP", (bool*)&features.fphp);
+        ImGui::TableNextColumn(); ImGui::Checkbox("ASIMDHP", (bool*)&features.asimdhp);
+        ImGui::EndTable();
+        
+        ImGui::Unindent();
+    }
+#else
     // SIMD Instructions
     if (ImGui::CollapsingHeader("SIMD Instructions", ImGuiTreeNodeFlags_DefaultOpen)) {
         ImGui::Indent();
@@ -252,6 +354,7 @@ void GUI::renderFeatures() {
         ImGui::EndTable();
         ImGui::Unindent();
     }
+#endif
 }
 
 void GUI::renderCacheInfo() {
