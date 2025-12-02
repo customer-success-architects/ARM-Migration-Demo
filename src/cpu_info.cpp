@@ -126,7 +126,7 @@ void CPUInfo::detectARMFeatures() {
     // Basic features from HWCAP
     features_.fp = hwcap & HWCAP_FP;
     features_.asimd = hwcap & HWCAP_ASIMD;
-    features_.neon = hwcap & HWCAP_ASIMD;  // NEON is ASIMD on AArch64
+    features_.neon = hwcap & HWCAP_ASIMD;  // NEON is the marketing name for ASIMD on AArch64
     features_.aes = hwcap & HWCAP_AES;
     features_.pmull = hwcap & HWCAP_PMULL;
     features_.sha1 = hwcap & HWCAP_SHA1;
@@ -188,7 +188,8 @@ void CPUInfo::detectARMFeatures() {
     // Get SVE vector length if SVE is available
     if (features_.sve) {
 #ifdef HWCAP_SVE
-        // SVE vector length can be read from /proc/sys/abi/sve_default_vector_length
+        // SVE vector length is reported in bytes in sysfs
+        // We convert to bits for display purposes
         std::ifstream sve_vl("/proc/sys/abi/sve_default_vector_length");
         if (sve_vl.is_open()) {
             sve_vl >> features_.sve_vector_length;
