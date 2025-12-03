@@ -1,5 +1,6 @@
 #pragma once
 
+#include "arch_detect.h"
 #include <string>
 #include <cstdint>
 #include <array>
@@ -7,7 +8,7 @@
 class CPUInfo {
 public:
     struct Features {
-#if defined(TARGET_ARCH_X86) || (!defined(TARGET_ARCH_ARM64) && !defined(TARGET_ARCH_ARM) && (defined(__x86_64__) || defined(_M_X64) || defined(__i386__) || defined(_M_IX86)))
+#ifdef CPU_ARCH_X86
         // x86 SIMD Instructions
         bool mmx = false;
         bool sse = false;
@@ -108,7 +109,7 @@ public:
         uint32_t logical_cores = 0;
         uint32_t base_frequency_mhz = 0;
         uint32_t max_frequency_mhz = 0;
-#if defined(TARGET_ARCH_ARM64) || defined(TARGET_ARCH_ARM) || defined(__aarch64__) || defined(__arm__)
+#ifdef CPU_ARCH_ARM
         uint32_t midr = 0;        // Main ID Register
         uint32_t revidr = 0;      // Revision ID Register
         std::string implementer;  // CPU implementer (ARM, Apple, Qualcomm, etc.)
@@ -132,7 +133,7 @@ private:
     CacheInfo cache_info_;
     ProcessorInfo processor_info_;
     
-#if defined(TARGET_ARCH_X86) || (!defined(TARGET_ARCH_ARM64) && !defined(TARGET_ARCH_ARM) && (defined(__x86_64__) || defined(_M_X64) || defined(__i386__) || defined(_M_IX86)))
+#ifdef CPU_ARCH_X86
     uint32_t max_basic_leaf_ = 0;
     uint32_t max_extended_leaf_ = 0;
     

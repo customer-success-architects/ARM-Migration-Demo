@@ -1,4 +1,5 @@
 #include "gui.h"
+#include "arch_detect.h"
 #include "imgui.h"
 #include "imgui_impl_sdl2.h"
 #include "imgui_impl_opengl3.h"
@@ -9,13 +10,6 @@
 #include <GL/gl.h>
 #endif
 #include <cstdio>
-
-// Architecture detection macros (match cpu_info.cpp)
-#if defined(TARGET_ARCH_X86) || (!defined(TARGET_ARCH_ARM64) && !defined(TARGET_ARCH_ARM) && (defined(__x86_64__) || defined(_M_X64) || defined(__i386__) || defined(_M_IX86)))
-#define CPU_ARCH_X86 1
-#else
-#define CPU_ARCH_ARM 1
-#endif
 
 GUI::GUI() : cpu_info_(std::make_unique<CPUInfo>()) {}
 

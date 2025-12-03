@@ -1,15 +1,9 @@
 #include "cpu_info.h"
+#include "arch_detect.h"
 #include <cstring>
 #include <fstream>
 #include <sstream>
 #include <thread>
-
-// Architecture detection macros
-#if defined(TARGET_ARCH_X86) || (!defined(TARGET_ARCH_ARM64) && !defined(TARGET_ARCH_ARM) && (defined(__x86_64__) || defined(_M_X64) || defined(__i386__) || defined(_M_IX86)))
-#define CPU_ARCH_X86 1
-#else
-#define CPU_ARCH_ARM 1
-#endif
 
 #ifdef CPU_ARCH_X86
 #ifdef _MSC_VER
