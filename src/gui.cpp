@@ -36,9 +36,15 @@ bool GUI::initialize() {
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
     
     SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
+#ifdef ARM_BUILD
+    window_ = SDL_CreateWindow("ARM64 CPU Feature Detector", 
+                                SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+                                1280, 720, window_flags);
+#else
     window_ = SDL_CreateWindow("x86 CPU Feature Detector", 
                                 SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                                 1280, 720, window_flags);
+#endif
     if (!window_) {
         printf("Error creating window: %s\n", SDL_GetError());
         return false;
@@ -122,9 +128,13 @@ void GUI::render() {
     ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | 
                                      ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings;
     
+#ifdef ARM_BUILD
+    ImGui::Begin("ARM64 CPU Feature Detector", nullptr, window_flags);
+    ImGui::Text("ARM64 CPU Information");
+#else
     ImGui::Begin("x86 CPU Feature Detector", nullptr, window_flags);
-    
     ImGui::Text("x86/x64 CPU Information");
+#endif
     ImGui::Separator();
     
     if (ImGui::BeginTabBar("CPUTabs")) {
@@ -153,13 +163,20 @@ void GUI::renderProcessorInfo() {
     const auto& info = cpu_info_->getProcessorInfo();
     
     ImGui::Spacing();
+    ImGui::Text("Architecture:  %s", info.architecture.c_str());
     ImGui::Text("Vendor:        %s", info.vendor.c_str());
     ImGui::Text("Brand:         %s", info.brand.c_str());
     ImGui::Separator();
     
+#ifdef ARM_BUILD
+    ImGui::Text("ARM Version:   ARMv%u", info.family);
+    ImGui::Text("Part Number:   0x%X", info.model);
+    ImGui::Text("Revision:      %u", info.stepping);
+#else
     ImGui::Text("Family:        %u", info.family);
     ImGui::Text("Model:         %u", info.model);
     ImGui::Text("Stepping:      %u", info.stepping);
+#endif
     ImGui::Separator();
     
     ImGui::Text("Physical Cores: %u", info.physical_cores);
@@ -179,7 +196,82 @@ void GUI::renderFeatures() {
     
     ImGui::Spacing();
     
-    // SIMD Instructions
+#ifdef ARM_BUILD
+    // ARM SIMD Instructions
+    if (ImGui::CollapsingHeader("SIMD Instructions", ImGuiTreeNodeFlags_DefaultOpen)) {
+        ImGui::Indent();
+        
+        ImGui::BeginTable("SIMD", 3);
+        ImGui::TableNextColumn(); ImGui::Checkbox("NEON (ASIMD)", (bool*)&features.neon);
+        ImGui::TableNextColumn(); ImGui::Checkbox("SVE", (bool*)&features.sve);
+        ImGui::TableNextColumn(); ImGui::Checkbox("SVE2", (bool*)&features.sve2);
+        
+        ImGui::TableNextColumn(); ImGui::Checkbox("Dot Product", (bool*)&features.dotprod);
+        ImGui::TableNextColumn(); ImGui::Checkbox("Int8 Matrix Mul", (bool*)&features.i8mm);
+        ImGui::TableNextColumn(); ImGui::Checkbox("BF16", (bool*)&features.bf16);
+        ImGui::EndTable();
+        
+        ImGui::Unindent();
+    }
+    
+    // ARM Floating Point
+    if (ImGui::CollapsingHeader("Floating Point", ImGuiTreeNodeFlags_DefaultOpen)) {
+        ImGui::Indent();
+        ImGui::BeginTable("FP", 3);
+        ImGui::TableNextColumn(); ImGui::Checkbox("FP", (bool*)&features.fp);
+        ImGui::TableNextColumn(); ImGui::Checkbox("FP16", (bool*)&features.fp16);
+        ImGui::TableNextColumn(); ImGui::Checkbox("FCMA", (bool*)&features.fcma);
+        
+        ImGui::TableNextColumn(); ImGui::Checkbox("FRINT", (bool*)&features.frint);
+        ImGui::TableNextColumn(); ImGui::Checkbox("JSCVT", (bool*)&features.jscvt);
+        ImGui::TableNextColumn(); 
+        ImGui::EndTable();
+        ImGui::Unindent();
+    }
+    
+    // ARM Cryptographic Features
+    if (ImGui::CollapsingHeader("Cryptographic Features", ImGuiTreeNodeFlags_DefaultOpen)) {
+        ImGui::Indent();
+        ImGui::BeginTable("Crypto", 3);
+        ImGui::TableNextColumn(); ImGui::Checkbox("AES", (bool*)&features.aes);
+        ImGui::TableNextColumn(); ImGui::Checkbox("SHA-1", (bool*)&features.sha1);
+        ImGui::TableNextColumn(); ImGui::Checkbox("SHA-2", (bool*)&features.sha2);
+        
+        ImGui::TableNextColumn(); ImGui::Checkbox("SHA-3", (bool*)&features.sha3);
+        ImGui::TableNextColumn(); ImGui::Checkbox("SHA-512", (bool*)&features.sha512);
+        ImGui::TableNextColumn(); ImGui::Checkbox("PMULL", (bool*)&features.pmull);
+        ImGui::EndTable();
+        ImGui::Unindent();
+    }
+    
+    // ARM Atomics and Memory
+    if (ImGui::CollapsingHeader("Atomics & Memory", ImGuiTreeNodeFlags_DefaultOpen)) {
+        ImGui::Indent();
+        ImGui::BeginTable("Atomics", 3);
+        ImGui::TableNextColumn(); ImGui::Checkbox("Atomics (LSE)", (bool*)&features.atomics);
+        ImGui::TableNextColumn(); ImGui::Checkbox("CRC32", (bool*)&features.crc32);
+        ImGui::TableNextColumn(); ImGui::Checkbox("LSE", (bool*)&features.lse);
+        ImGui::EndTable();
+        ImGui::Unindent();
+    }
+    
+    // ARM Security Features
+    if (ImGui::CollapsingHeader("Security Features", ImGuiTreeNodeFlags_DefaultOpen)) {
+        ImGui::Indent();
+        ImGui::BeginTable("Security", 3);
+        ImGui::TableNextColumn(); ImGui::Checkbox("BTI", (bool*)&features.bti);
+        ImGui::TableNextColumn(); ImGui::Checkbox("MTE", (bool*)&features.mte);
+        ImGui::TableNextColumn(); ImGui::Checkbox("SB", (bool*)&features.sb);
+        
+        ImGui::TableNextColumn(); ImGui::Checkbox("SSBS", (bool*)&features.ssbs);
+        ImGui::TableNextColumn(); 
+        ImGui::TableNextColumn();
+        ImGui::EndTable();
+        ImGui::Unindent();
+    }
+    
+#else
+    // x86 SIMD Instructions
     if (ImGui::CollapsingHeader("SIMD Instructions", ImGuiTreeNodeFlags_DefaultOpen)) {
         ImGui::Indent();
         
@@ -212,7 +304,7 @@ void GUI::renderFeatures() {
         ImGui::Unindent();
     }
     
-    // Cryptographic Features
+    // x86 Cryptographic Features
     if (ImGui::CollapsingHeader("Cryptographic Features", ImGuiTreeNodeFlags_DefaultOpen)) {
         ImGui::Indent();
         ImGui::BeginTable("Crypto", 3);
@@ -223,7 +315,7 @@ void GUI::renderFeatures() {
         ImGui::Unindent();
     }
     
-    // Virtualization
+    // x86 Virtualization
     if (ImGui::CollapsingHeader("Virtualization & Security", ImGuiTreeNodeFlags_DefaultOpen)) {
         ImGui::Indent();
         ImGui::BeginTable("VirtSec", 3);
@@ -238,7 +330,7 @@ void GUI::renderFeatures() {
         ImGui::Unindent();
     }
     
-    // Other Features
+    // x86 Other Features
     if (ImGui::CollapsingHeader("Other Features", ImGuiTreeNodeFlags_DefaultOpen)) {
         ImGui::Indent();
         ImGui::BeginTable("Other", 3);
@@ -252,6 +344,7 @@ void GUI::renderFeatures() {
         ImGui::EndTable();
         ImGui::Unindent();
     }
+#endif
 }
 
 void GUI::renderCacheInfo() {
@@ -293,10 +386,19 @@ void GUI::renderCacheInfo() {
         ImGui::Text("Logical Cores:  %u", info.logical_cores);
         
         if (info.logical_cores > info.physical_cores) {
+#ifdef ARM_BUILD
+            ImGui::Text("SMT: Enabled (%u threads per core)", 
+                       info.logical_cores / info.physical_cores);
+#else
             ImGui::Text("Hyperthreading: Enabled (%u threads per core)", 
                        info.logical_cores / info.physical_cores);
+#endif
         } else {
+#ifdef ARM_BUILD
+            ImGui::Text("SMT: Not detected");
+#else
             ImGui::Text("Hyperthreading: Not detected");
+#endif
         }
         
         ImGui::Unindent();

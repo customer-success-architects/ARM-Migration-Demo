@@ -1,19 +1,23 @@
-# x86 CPU Feature Detector
+# CPU Feature Detector
 
-A desktop application that detects and displays x86/x64 CPU capabilities using the CPUID instruction.
+A cross-platform desktop application that detects and displays CPU capabilities. Supports both **x86/x64** and **ARM64** architectures.
 
 ## Features
 
 - **CPU Identification**: Vendor, brand, family, model, stepping
-- **Instruction Set Detection**: SSE, AVX, AVX2, AVX-512 support
-- **Cryptographic Features**: AES-NI, SHA extensions
+- **Instruction Set Detection**: 
+  - x86: SSE, AVX, AVX2, AVX-512 support
+  - ARM: NEON, SVE, SVE2 support
+- **Cryptographic Features**: AES, SHA extensions (architecture-specific)
 - **Cache Information**: L1/L2/L3 cache sizes and topology
 - **Core Topology**: Physical cores and logical threads
 - **Frequency Information**: Base and maximum CPU frequencies
 
 ## Architecture Support
 
-**x86/x86-64 ONLY** - This application is intentionally built for x86 architecture only and will not compile or run on ARM processors.
+This application supports both architectures:
+- **x86/x86-64**: Uses CPUID instruction for feature detection
+- **ARM64/AArch64**: Uses Linux hwcap and sysfs for feature detection
 
 ## Building
 
@@ -40,10 +44,10 @@ cd ..
 mkdir build && cd build
 cmake ..
 make
-./x86CPUDetector
+./CPUDetector
 ```
 
-### Linux
+### Linux (x86 or ARM64)
 
 ```bash
 # Install dependencies (Ubuntu/Debian)
@@ -59,7 +63,7 @@ cd ..
 mkdir build && cd build
 cmake ..
 make
-./x86CPUDetector
+./CPUDetector
 ```
 
 ### Windows
@@ -80,31 +84,35 @@ cmake .. -DCMAKE_TOOLCHAIN_FILE=[vcpkg root]/scripts/buildsystems/vcpkg.cmake
 cmake --build .
 ```
 
-## Running with Docker (Recommended for ARM Macs)
+## Running with Docker
 
-If you're on Apple Silicon (ARM) or want to run in an isolated environment:
-
-```bash
-# Make sure Docker Desktop is installed and running
-./run-docker.sh
-```
-
-This will build and run the x86 application in a Docker container using x86 emulation, even on ARM Macs.
-
-### Alternative Docker Commands
+For containerized deployment on ARM64:
 
 ```bash
-# Build the image
-docker build --platform linux/amd64 -t x86-cpu-detector .
-
-# Run the container
-docker run --platform linux/amd64 --rm x86-cpu-detector
+# Build and run for ARM64
+docker build --platform linux/arm64 -t cpu-detector .
+docker run --platform linux/arm64 --rm cpu-detector
 
 # Or use docker-compose
 docker-compose up --build
 ```
 
 **Note**: The GUI requires X11 forwarding, which works on Linux but requires XQuartz setup on macOS. The container will display CPU information in the terminal.
+
+## Architecture-Specific Features
+
+### x86/x64 Features Detected
+- SIMD: MMX, SSE, SSE2, SSE3, SSSE3, SSE4.1, SSE4.2, AVX, AVX2, AVX-512
+- Crypto: AES-NI, SHA, PCLMULQDQ
+- Virtualization: VT-x, AMD-V
+- Security: NX, SMEP, SMAP, SGX
+
+### ARM64 Features Detected
+- SIMD: NEON (ASIMD), SVE, SVE2, Dot Product, Int8 Matrix Multiply
+- Floating Point: FP, FP16, BF16, FCMA, FRINT
+- Crypto: AES, SHA-1, SHA-2, SHA-3, SHA-512, PMULL
+- Memory: Atomics (LSE), CRC32
+- Security: BTI, MTE, SB, SSBS
 
 ## License
 

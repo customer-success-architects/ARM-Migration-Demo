@@ -7,7 +7,42 @@
 class CPUInfo {
 public:
     struct Features {
-        // SIMD Instructions
+#ifdef ARM_BUILD
+        // ARM SIMD Instructions
+        bool neon = false;
+        bool sve = false;
+        bool sve2 = false;
+        
+        // ARM Cryptographic
+        bool aes = false;
+        bool sha1 = false;
+        bool sha2 = false;
+        bool sha3 = false;
+        bool sha512 = false;
+        bool pmull = false;
+        
+        // ARM Floating Point
+        bool fp = false;
+        bool fp16 = false;
+        bool bf16 = false;
+        
+        // ARM Atomics and Memory
+        bool atomics = false;
+        bool crc32 = false;
+        bool lse = false;
+        
+        // ARM Other Features
+        bool dotprod = false;
+        bool i8mm = false;
+        bool jscvt = false;
+        bool fcma = false;
+        bool frint = false;
+        bool sb = false;
+        bool ssbs = false;
+        bool bti = false;
+        bool mte = false;
+#else
+        // x86 SIMD Instructions
         bool mmx = false;
         bool sse = false;
         bool sse2 = false;
@@ -24,22 +59,22 @@ public:
         bool fma = false;
         bool fma4 = false;
         
-        // Cryptographic
+        // x86 Cryptographic
         bool aes = false;
         bool sha = false;
         bool pclmulqdq = false;
         
-        // Virtualization
+        // x86 Virtualization
         bool vmx = false;  // Intel VT-x
         bool svm = false;  // AMD-V
         
-        // Security
+        // x86 Security
         bool nx = false;
         bool smep = false;
         bool smap = false;
         bool sgx = false;
         
-        // Other
+        // x86 Other
         bool rdrand = false;
         bool rdseed = false;
         bool popcnt = false;
@@ -47,6 +82,7 @@ public:
         bool bmi2 = false;
         bool tsc = false;
         bool x87_fpu = false;
+#endif
     };
     
     struct CacheInfo {
@@ -60,6 +96,7 @@ public:
     struct ProcessorInfo {
         std::string vendor;
         std::string brand;
+        std::string architecture;
         uint32_t family = 0;
         uint32_t model = 0;
         uint32_t stepping = 0;
@@ -82,6 +119,13 @@ private:
     CacheInfo cache_info_;
     ProcessorInfo processor_info_;
     
+#ifdef ARM_BUILD
+    void detectARMInfo();
+    void detectARMFeatures();
+    void detectARMCacheInfo();
+    void detectARMTopology();
+    void detectARMFrequency();
+#else
     uint32_t max_basic_leaf_ = 0;
     uint32_t max_extended_leaf_ = 0;
     
@@ -92,4 +136,5 @@ private:
     void detectCacheInfo();
     void detectTopology();
     void detectFrequency();
+#endif
 };
