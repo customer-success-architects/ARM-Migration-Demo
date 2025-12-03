@@ -22,3 +22,5 @@ external/
 
 # macOS
 .DS_Store
+_codeql_build_dir/
+_codeql_detected_source_root
