@@ -3,6 +3,9 @@ build/
 cmake-build-*/
 out/
 
+# External dependencies (cloned at setup time)
+external/
+
 # IDE files
 .vscode/
 .idea/
