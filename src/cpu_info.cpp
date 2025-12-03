@@ -574,11 +574,11 @@ void CPUInfo::detectTopology() {
     if (max_basic_leaf_ >= 0xB) {
         cpuid(0xB, 0, eax, ebx, ecx, edx);
         if (ebx != 0) {
-            // Thread level
+            // Thread level - extract thread mask width from subleaf 0
             uint32_t thread_mask_width = eax & 0x1F;
             
+            // Core level - call subleaf 1 to advance enumeration (result not used directly)
             cpuid(0xB, 1, eax, ebx, ecx, edx);
-            // Core level
             
             cpuid(1, 0, eax, ebx, ecx, edx);
             uint32_t logical_per_package = (ebx >> 16) & 0xFF;
