@@ -1,4 +1,5 @@
 #include "gui.h"
+#include "arch_detect.h"
 #include <cstdio>
 
 int main(int argc, char* argv[]) {
@@ -12,8 +13,12 @@ int main(int argc, char* argv[]) {
         return 1;
     }
     
-    printf("x86 CPU Feature Detector started\n");
-    printf("This application is x86/x64 architecture only\n");
+    printf("CPU Feature Detector started\n");
+#ifdef CPU_ARCH_ARM
+    printf("Running on ARM architecture\n");
+#else
+    printf("Running on x86/x64 architecture\n");
+#endif
     
     gui.run();
     
