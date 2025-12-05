@@ -3,6 +3,12 @@ build/
 cmake-build-*/
 out/
 
+# External dependencies
+external/
+
+# CodeQL artifacts
+_codeql_detected_source_root
+
 # IDE files
 .vscode/
 .idea/

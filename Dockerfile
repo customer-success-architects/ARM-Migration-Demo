@@ -1,5 +1,5 @@
-# Use x86-64 Ubuntu base image
-FROM --platform=linux/amd64 ubuntu:22.04
+# Use ARM64 Ubuntu base image
+FROM --platform=linux/arm64 ubuntu:22.04
 
 # Prevent interactive prompts during build
 ENV DEBIAN_FRONTEND=noninteractive
@@ -38,4 +38,4 @@ RUN mkdir -p build && \
 ENV DISPLAY=:99
 
 # Default command
-CMD ["./build/x86CPUDetector"]
+CMD ["./build/CPUDetector"]
