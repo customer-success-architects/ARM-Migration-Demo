@@ -12,8 +12,13 @@ int main(int argc, char* argv[]) {
         return 1;
     }
     
-    printf("x86 CPU Feature Detector started\n");
-    printf("This application is x86/x64 architecture only\n");
+#ifdef TARGET_ARCH_X86
+    printf("CPU Feature Detector started (x86/x64 architecture)\n");
+#elif defined(TARGET_ARCH_ARM)
+    printf("CPU Feature Detector started (ARM architecture)\n");
+#else
+    printf("CPU Feature Detector started\n");
+#endif
     
     gui.run();
     

@@ -1,7 +1,6 @@
 #!/bin/bash
 
-echo "Building and running x86 CPU Feature Detector in Docker..."
-echo "This will run x86 container even on ARM Mac (via emulation)"
+echo "Building and running CPU Feature Detector in Docker..."
 echo ""
 
 # Check if Docker is installed
@@ -11,9 +10,27 @@ if ! command -v docker &> /dev/null; then
     exit 1
 fi
 
-# Build the Docker image for x86/amd64 platform
-echo "Building Docker image for linux/amd64 platform..."
-docker build --platform linux/amd64 -t x86-cpu-detector .
+# Detect current architecture
+ARCH=$(uname -m)
+if [[ "$ARCH" == "x86_64" || "$ARCH" == "amd64" ]]; then
+    PLATFORM="linux/amd64"
+    echo "Building for x86_64 architecture..."
+elif [[ "$ARCH" == "aarch64" || "$ARCH" == "arm64" ]]; then
+    PLATFORM="linux/arm64"
+    echo "Building for ARM64 architecture..."
+else
+    echo "Detected architecture: $ARCH"
+    echo "Building for native architecture..."
+    PLATFORM=""
+fi
+
+# Build the Docker image
+echo "Building Docker image..."
+if [ -n "$PLATFORM" ]; then
+    docker build --platform "$PLATFORM" -t cpu-detector .
+else
+    docker build -t cpu-detector .
+fi
 
 if [ $? -ne 0 ]; then
     echo "ERROR: Docker build failed"
@@ -27,8 +44,11 @@ echo ""
 # Run the container
 # Note: GUI won't work on macOS without additional X11 setup
 # This will run and show CPU info in terminal output
-docker run --platform linux/amd64 --rm x86-cpu-detector
+if [ -n "$PLATFORM" ]; then
+    docker run --platform "$PLATFORM" --rm cpu-detector
+else
+    docker run --rm cpu-detector
+fi
 
 echo ""
 echo "Note: On macOS, GUI display requires XQuartz and additional setup."
-echo "The application ran in x86 emulation mode via Docker."
