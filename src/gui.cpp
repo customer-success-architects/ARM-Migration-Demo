@@ -185,6 +185,14 @@ void GUI::renderProcessorInfo() {
     }
 }
 
+// Helper function to display a feature checkbox safely (read-only display)
+static void FeatureCheckbox(const char* label, bool value) {
+    bool temp = value;
+    ImGui::BeginDisabled();
+    ImGui::Checkbox(label, &temp);
+    ImGui::EndDisabled();
+}
+
 void GUI::renderFeatures() {
     const auto& features = cpu_info_->getFeatures();
     
@@ -196,29 +204,29 @@ void GUI::renderFeatures() {
         ImGui::Indent();
         
         ImGui::BeginTable("SIMD", 3);
-        ImGui::TableNextColumn(); ImGui::Checkbox("x87 FPU", (bool*)&features.x87_fpu);
-        ImGui::TableNextColumn(); ImGui::Checkbox("MMX", (bool*)&features.mmx);
-        ImGui::TableNextColumn(); ImGui::Checkbox("SSE", (bool*)&features.sse);
+        ImGui::TableNextColumn(); FeatureCheckbox("x87 FPU", features.x87_fpu);
+        ImGui::TableNextColumn(); FeatureCheckbox("MMX", features.mmx);
+        ImGui::TableNextColumn(); FeatureCheckbox("SSE", features.sse);
         
-        ImGui::TableNextColumn(); ImGui::Checkbox("SSE2", (bool*)&features.sse2);
-        ImGui::TableNextColumn(); ImGui::Checkbox("SSE3", (bool*)&features.sse3);
-        ImGui::TableNextColumn(); ImGui::Checkbox("SSSE3", (bool*)&features.ssse3);
+        ImGui::TableNextColumn(); FeatureCheckbox("SSE2", features.sse2);
+        ImGui::TableNextColumn(); FeatureCheckbox("SSE3", features.sse3);
+        ImGui::TableNextColumn(); FeatureCheckbox("SSSE3", features.ssse3);
         
-        ImGui::TableNextColumn(); ImGui::Checkbox("SSE4.1", (bool*)&features.sse4_1);
-        ImGui::TableNextColumn(); ImGui::Checkbox("SSE4.2", (bool*)&features.sse4_2);
-        ImGui::TableNextColumn(); ImGui::Checkbox("AVX", (bool*)&features.avx);
+        ImGui::TableNextColumn(); FeatureCheckbox("SSE4.1", features.sse4_1);
+        ImGui::TableNextColumn(); FeatureCheckbox("SSE4.2", features.sse4_2);
+        ImGui::TableNextColumn(); FeatureCheckbox("AVX", features.avx);
         
-        ImGui::TableNextColumn(); ImGui::Checkbox("AVX2", (bool*)&features.avx2);
-        ImGui::TableNextColumn(); ImGui::Checkbox("FMA", (bool*)&features.fma);
-        ImGui::TableNextColumn(); ImGui::Checkbox("FMA4", (bool*)&features.fma4);
+        ImGui::TableNextColumn(); FeatureCheckbox("AVX2", features.avx2);
+        ImGui::TableNextColumn(); FeatureCheckbox("FMA", features.fma);
+        ImGui::TableNextColumn(); FeatureCheckbox("FMA4", features.fma4);
         ImGui::EndTable();
         
         ImGui::Text("AVX-512 Extensions:");
         ImGui::BeginTable("AVX512", 2);
-        ImGui::TableNextColumn(); ImGui::Checkbox("AVX-512 F", (bool*)&features.avx512f);
-        ImGui::TableNextColumn(); ImGui::Checkbox("AVX-512 DQ", (bool*)&features.avx512dq);
-        ImGui::TableNextColumn(); ImGui::Checkbox("AVX-512 BW", (bool*)&features.avx512bw);
-        ImGui::TableNextColumn(); ImGui::Checkbox("AVX-512 VL", (bool*)&features.avx512vl);
+        ImGui::TableNextColumn(); FeatureCheckbox("AVX-512 F", features.avx512f);
+        ImGui::TableNextColumn(); FeatureCheckbox("AVX-512 DQ", features.avx512dq);
+        ImGui::TableNextColumn(); FeatureCheckbox("AVX-512 BW", features.avx512bw);
+        ImGui::TableNextColumn(); FeatureCheckbox("AVX-512 VL", features.avx512vl);
         ImGui::EndTable();
         
         ImGui::Unindent();
@@ -228,9 +236,9 @@ void GUI::renderFeatures() {
     if (ImGui::CollapsingHeader("Cryptographic Features", ImGuiTreeNodeFlags_DefaultOpen)) {
         ImGui::Indent();
         ImGui::BeginTable("Crypto", 3);
-        ImGui::TableNextColumn(); ImGui::Checkbox("AES-NI", (bool*)&features.aes);
-        ImGui::TableNextColumn(); ImGui::Checkbox("SHA", (bool*)&features.sha);
-        ImGui::TableNextColumn(); ImGui::Checkbox("PCLMULQDQ", (bool*)&features.pclmulqdq);
+        ImGui::TableNextColumn(); FeatureCheckbox("AES-NI", features.aes);
+        ImGui::TableNextColumn(); FeatureCheckbox("SHA", features.sha);
+        ImGui::TableNextColumn(); FeatureCheckbox("PCLMULQDQ", features.pclmulqdq);
         ImGui::EndTable();
         ImGui::Unindent();
     }
@@ -239,13 +247,13 @@ void GUI::renderFeatures() {
     if (ImGui::CollapsingHeader("Virtualization & Security", ImGuiTreeNodeFlags_DefaultOpen)) {
         ImGui::Indent();
         ImGui::BeginTable("VirtSec", 3);
-        ImGui::TableNextColumn(); ImGui::Checkbox("Intel VT-x", (bool*)&features.vmx);
-        ImGui::TableNextColumn(); ImGui::Checkbox("AMD-V", (bool*)&features.svm);
-        ImGui::TableNextColumn(); ImGui::Checkbox("NX Bit", (bool*)&features.nx);
+        ImGui::TableNextColumn(); FeatureCheckbox("Intel VT-x", features.vmx);
+        ImGui::TableNextColumn(); FeatureCheckbox("AMD-V", features.svm);
+        ImGui::TableNextColumn(); FeatureCheckbox("NX Bit", features.nx);
         
-        ImGui::TableNextColumn(); ImGui::Checkbox("SMEP", (bool*)&features.smep);
-        ImGui::TableNextColumn(); ImGui::Checkbox("SMAP", (bool*)&features.smap);
-        ImGui::TableNextColumn(); ImGui::Checkbox("SGX", (bool*)&features.sgx);
+        ImGui::TableNextColumn(); FeatureCheckbox("SMEP", features.smep);
+        ImGui::TableNextColumn(); FeatureCheckbox("SMAP", features.smap);
+        ImGui::TableNextColumn(); FeatureCheckbox("SGX", features.sgx);
         ImGui::EndTable();
         ImGui::Unindent();
     }
@@ -254,13 +262,13 @@ void GUI::renderFeatures() {
     if (ImGui::CollapsingHeader("Other Features", ImGuiTreeNodeFlags_DefaultOpen)) {
         ImGui::Indent();
         ImGui::BeginTable("Other", 3);
-        ImGui::TableNextColumn(); ImGui::Checkbox("TSC", (bool*)&features.tsc);
-        ImGui::TableNextColumn(); ImGui::Checkbox("RDRAND", (bool*)&features.rdrand);
-        ImGui::TableNextColumn(); ImGui::Checkbox("RDSEED", (bool*)&features.rdseed);
+        ImGui::TableNextColumn(); FeatureCheckbox("TSC", features.tsc);
+        ImGui::TableNextColumn(); FeatureCheckbox("RDRAND", features.rdrand);
+        ImGui::TableNextColumn(); FeatureCheckbox("RDSEED", features.rdseed);
         
-        ImGui::TableNextColumn(); ImGui::Checkbox("POPCNT", (bool*)&features.popcnt);
-        ImGui::TableNextColumn(); ImGui::Checkbox("BMI1", (bool*)&features.bmi1);
-        ImGui::TableNextColumn(); ImGui::Checkbox("BMI2", (bool*)&features.bmi2);
+        ImGui::TableNextColumn(); FeatureCheckbox("POPCNT", features.popcnt);
+        ImGui::TableNextColumn(); FeatureCheckbox("BMI1", features.bmi1);
+        ImGui::TableNextColumn(); FeatureCheckbox("BMI2", features.bmi2);
         ImGui::EndTable();
         ImGui::Unindent();
     }
@@ -271,13 +279,13 @@ void GUI::renderFeatures() {
         ImGui::Indent();
         
         ImGui::BeginTable("SIMD", 3);
-        ImGui::TableNextColumn(); ImGui::Checkbox("NEON (ASIMD)", (bool*)&features.neon);
-        ImGui::TableNextColumn(); ImGui::Checkbox("NEON FP16", (bool*)&features.neon_fp16);
-        ImGui::TableNextColumn(); ImGui::Checkbox("NEON DotProd", (bool*)&features.neon_dotprod);
+        ImGui::TableNextColumn(); FeatureCheckbox("NEON (ASIMD)", features.neon);
+        ImGui::TableNextColumn(); FeatureCheckbox("NEON FP16", features.neon_fp16);
+        ImGui::TableNextColumn(); FeatureCheckbox("NEON DotProd", features.neon_dotprod);
         
-        ImGui::TableNextColumn(); ImGui::Checkbox("SVE", (bool*)&features.sve);
-        ImGui::TableNextColumn(); ImGui::Checkbox("SVE2", (bool*)&features.sve2);
-        ImGui::TableNextColumn(); ImGui::Checkbox("I8MM", (bool*)&features.i8mm);
+        ImGui::TableNextColumn(); FeatureCheckbox("SVE", features.sve);
+        ImGui::TableNextColumn(); FeatureCheckbox("SVE2", features.sve2);
+        ImGui::TableNextColumn(); FeatureCheckbox("I8MM", features.i8mm);
         ImGui::EndTable();
         
         ImGui::Unindent();
@@ -287,10 +295,10 @@ void GUI::renderFeatures() {
     if (ImGui::CollapsingHeader("Floating Point", ImGuiTreeNodeFlags_DefaultOpen)) {
         ImGui::Indent();
         ImGui::BeginTable("FP", 3);
-        ImGui::TableNextColumn(); ImGui::Checkbox("FP", (bool*)&features.fp);
-        ImGui::TableNextColumn(); ImGui::Checkbox("FP16", (bool*)&features.fp16);
-        ImGui::TableNextColumn(); ImGui::Checkbox("BF16", (bool*)&features.bf16);
-        ImGui::TableNextColumn(); ImGui::Checkbox("FRINT", (bool*)&features.frint);
+        ImGui::TableNextColumn(); FeatureCheckbox("FP", features.fp);
+        ImGui::TableNextColumn(); FeatureCheckbox("FP16", features.fp16);
+        ImGui::TableNextColumn(); FeatureCheckbox("BF16", features.bf16);
+        ImGui::TableNextColumn(); FeatureCheckbox("FRINT", features.frint);
         ImGui::EndTable();
         ImGui::Unindent();
     }
@@ -299,16 +307,16 @@ void GUI::renderFeatures() {
     if (ImGui::CollapsingHeader("Cryptographic Features", ImGuiTreeNodeFlags_DefaultOpen)) {
         ImGui::Indent();
         ImGui::BeginTable("Crypto", 3);
-        ImGui::TableNextColumn(); ImGui::Checkbox("AES", (bool*)&features.aes);
-        ImGui::TableNextColumn(); ImGui::Checkbox("SHA1", (bool*)&features.sha1);
-        ImGui::TableNextColumn(); ImGui::Checkbox("SHA2", (bool*)&features.sha2);
+        ImGui::TableNextColumn(); FeatureCheckbox("AES", features.aes);
+        ImGui::TableNextColumn(); FeatureCheckbox("SHA1", features.sha1);
+        ImGui::TableNextColumn(); FeatureCheckbox("SHA2", features.sha2);
         
-        ImGui::TableNextColumn(); ImGui::Checkbox("SHA3", (bool*)&features.sha3);
-        ImGui::TableNextColumn(); ImGui::Checkbox("SHA512", (bool*)&features.sha512);
-        ImGui::TableNextColumn(); ImGui::Checkbox("CRC32", (bool*)&features.crc32);
+        ImGui::TableNextColumn(); FeatureCheckbox("SHA3", features.sha3);
+        ImGui::TableNextColumn(); FeatureCheckbox("SHA512", features.sha512);
+        ImGui::TableNextColumn(); FeatureCheckbox("CRC32", features.crc32);
         
-        ImGui::TableNextColumn(); ImGui::Checkbox("PMULL", (bool*)&features.pmull);
-        ImGui::TableNextColumn(); ImGui::Checkbox("RNG", (bool*)&features.rng);
+        ImGui::TableNextColumn(); FeatureCheckbox("PMULL", features.pmull);
+        ImGui::TableNextColumn(); FeatureCheckbox("RNG", features.rng);
         ImGui::EndTable();
         ImGui::Unindent();
     }
@@ -317,13 +325,13 @@ void GUI::renderFeatures() {
     if (ImGui::CollapsingHeader("Security Features", ImGuiTreeNodeFlags_DefaultOpen)) {
         ImGui::Indent();
         ImGui::BeginTable("Security", 3);
-        ImGui::TableNextColumn(); ImGui::Checkbox("BTI", (bool*)&features.bti);
-        ImGui::TableNextColumn(); ImGui::Checkbox("MTE", (bool*)&features.mte);
-        ImGui::TableNextColumn(); ImGui::Checkbox("PAC-A", (bool*)&features.paca);
+        ImGui::TableNextColumn(); FeatureCheckbox("BTI", features.bti);
+        ImGui::TableNextColumn(); FeatureCheckbox("MTE", features.mte);
+        ImGui::TableNextColumn(); FeatureCheckbox("PAC-A", features.paca);
         
-        ImGui::TableNextColumn(); ImGui::Checkbox("PAC-G", (bool*)&features.pacg);
-        ImGui::TableNextColumn(); ImGui::Checkbox("SSBS", (bool*)&features.ssbs);
-        ImGui::TableNextColumn(); ImGui::Checkbox("SB", (bool*)&features.sb);
+        ImGui::TableNextColumn(); FeatureCheckbox("PAC-G", features.pacg);
+        ImGui::TableNextColumn(); FeatureCheckbox("SSBS", features.ssbs);
+        ImGui::TableNextColumn(); FeatureCheckbox("SB", features.sb);
         ImGui::EndTable();
         ImGui::Unindent();
     }
@@ -332,11 +340,11 @@ void GUI::renderFeatures() {
     if (ImGui::CollapsingHeader("Other Features", ImGuiTreeNodeFlags_DefaultOpen)) {
         ImGui::Indent();
         ImGui::BeginTable("Other", 3);
-        ImGui::TableNextColumn(); ImGui::Checkbox("Atomics", (bool*)&features.atomics);
-        ImGui::TableNextColumn(); ImGui::Checkbox("DCPOP", (bool*)&features.dcpop);
-        ImGui::TableNextColumn(); ImGui::Checkbox("DCPODP", (bool*)&features.dcpodp);
+        ImGui::TableNextColumn(); FeatureCheckbox("Atomics", features.atomics);
+        ImGui::TableNextColumn(); FeatureCheckbox("DCPOP", features.dcpop);
+        ImGui::TableNextColumn(); FeatureCheckbox("DCPODP", features.dcpodp);
         
-        ImGui::TableNextColumn(); ImGui::Checkbox("FLAGM", (bool*)&features.flagm);
+        ImGui::TableNextColumn(); FeatureCheckbox("FLAGM", features.flagm);
         ImGui::EndTable();
         ImGui::Unindent();
     }
@@ -345,8 +353,8 @@ void GUI::renderFeatures() {
     // Generic fallback
     ImGui::Text("Feature detection not available for this architecture");
     ImGui::BeginTable("Generic", 2);
-    ImGui::TableNextColumn(); ImGui::Checkbox("SIMD", (bool*)&features.simd);
-    ImGui::TableNextColumn(); ImGui::Checkbox("Crypto", (bool*)&features.crypto);
+    ImGui::TableNextColumn(); FeatureCheckbox("SIMD", features.simd);
+    ImGui::TableNextColumn(); FeatureCheckbox("Crypto", features.crypto);
     ImGui::EndTable();
 #endif
 }

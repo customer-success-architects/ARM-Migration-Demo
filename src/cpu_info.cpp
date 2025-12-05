@@ -223,8 +223,6 @@ void CPUInfo::detectTopology() {
             uint32_t thread_mask_width = eax & 0x1F;
             
             cpuid(0xB, 1, eax, ebx, ecx, edx);
-            // Core level
-            // uint32_t core_mask_width = eax & 0x1F;
             
             cpuid(1, 0, eax, ebx, ecx, edx);
             uint32_t logical_per_package = (ebx >> 16) & 0xFF;
