@@ -1,16 +1,22 @@
 #!/bin/bash
 
-echo "Setting up x86 CPU Feature Detector..."
+echo "Setting up CPU Feature Detector..."
 
-# Check if running on x86/x64 architecture
+# Check architecture
 ARCH=$(uname -m)
-if [[ "$ARCH" != "x86_64" && "$ARCH" != "i386" && "$ARCH" != "i686" ]]; then
-    echo "ERROR: This project requires x86/x64 architecture"
-    echo "Current architecture: $ARCH"
-    exit 1
-fi
+echo "Detected architecture: $ARCH"
 
-echo "Architecture check passed: $ARCH"
+if [[ "$ARCH" == "x86_64" || "$ARCH" == "i386" || "$ARCH" == "i686" ]]; then
+    echo "Building for x86/x64 architecture"
+    BUILD_ARCH="x86"
+elif [[ "$ARCH" == "aarch64" || "$ARCH" == "arm64" ]]; then
+    echo "Building for ARM64 architecture"
+    BUILD_ARCH="arm"
+else
+    echo "Unknown architecture: $ARCH"
+    echo "Building with generic settings"
+    BUILD_ARCH="unknown"
+fi
 
 # Clone ImGui if not present
 if [ ! -d "external/imgui" ]; then
@@ -58,4 +64,4 @@ echo "Setup complete! To build:"
 echo "  mkdir build && cd build"
 echo "  cmake .."
 echo "  make"
-echo "  ./x86CPUDetector"
+echo "  ./CPUDetector"
